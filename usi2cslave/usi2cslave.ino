@@ -43,15 +43,16 @@ void setup() {
  * on the real bot this is would be the i2c addr even number that receives a reading or change address command
  */
 void receiveEvent(int bytes) {
-    Serial.println("receive event")
-    process_command(bytes);
+    Serial.println("receive event");
+    processCommand(bytes);
 }
 
 /*
  * for a master to read the location they will access the read addr + 1, an odd num above the read addr
  */
 void requestEvent(){
-    Serial.println("request event")
+    Serial.println("request event");
+    sendSensorData();
 }
 
 /*
@@ -63,20 +64,21 @@ void loop() {
     digitalWrite(LED, LOW);
     delay(50);
     currentDistance++;
-    if currentDistance > 750:
+    if(currentDistance > 750){
         currentDistance = 20;
+    }
 }
 
 
 void processCommand(int bytes){
     if(bytes > 0){
-        command = Wire.read();    // read one character from the I2C
+        byte command = Wire.read();    // read one character from the I2C
         if(command == READ_SENSOR){
             readSensorCommand();
         } else if(bytes == 3){
-            secondByte = Wire.read();
-            if(command === ADDR_UNLOCK_1 && secondByte == ADDR_UNLOCK_2){
-                newAddress = Wire.read();
+            byte secondByte = Wire.read();
+            if(command == ADDR_UNLOCK_1 && secondByte == ADDR_UNLOCK_2){
+                byte newAddress = Wire.read();
                 changeAddressCommand(newAddress);
             }
         }
@@ -84,17 +86,21 @@ void processCommand(int bytes){
 }
 
 void readSensorCommand(){
-    Serial.println("reading sensor:", current_distance);
+    Serial.print("reading sensor:");
+    Serial.println(currentDistance);
     lastDistanceRead = currentDistance;
 }
 
 void sendSensorData(){
-    Serial.println("reading sensor:", current_distance);
-    byte bytes[2]
+    Serial.print("lastDistanceRead send:");
+    Serial.println(lastDistanceRead);
+    byte bytes[2];
     bytes[0] = lastDistanceRead & 0xff;
-    bytes[1] = (input>>8) & 0xff;
-    Wire.write(bytes, 2);
+    bytes[1] = (lastDistanceRead>>8) & 0xff;
+    Serial.println(bytes[0]);
+    Serial.println(bytes[1]);
+    Wire.write(bytes,2);
 }
 
-void changeAddressCommand(int newAddress){
+void changeAddressCommand(byte newAddress){
 }
