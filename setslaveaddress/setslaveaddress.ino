@@ -13,8 +13,11 @@
 #define ADDR_UNLOCK_1 170
 #define ADDR_UNLOCK_2 165
 
-volatile byte new_address = 96;
+byte newAddress = 96;
 byte offset = 0;
+
+int lastChangeButtonPress = 0;
+int lastWriteButtonPress = 0;
 
 void setup() {
   Wire.begin();
@@ -25,8 +28,8 @@ void setup() {
   pinMode(BUTTON_1, INPUT);
   pinMode(WRITE_BUTTON, INPUT);
 
-  attachInterrupt(0, changeAddress, CHANGE);
-  attachInterrupt(1, writeAddress, CHANGE);
+  attachInterrupt(INT0, changeAddress, CHANGE);
+  attachInterrupt(INT1, writeAddress, FALLING);
 }
 
 
@@ -36,11 +39,14 @@ void loop() {
 }
 
 void changeAddress(){
-    int changeButton = digitalRead(BUTTON_1);
-    if(changeButton == 1){
-        Serial.print("changing address");
+    int buttonPress = millis();
+    if(buttonPress > lastChangeButtonPress+1000){
+        Serial.print("new address will be ");
         offset++;
         offset = offset>3 ? 0 : offset;
+        newAddress += offset*10;
+        Serial.println(newAddress);
+
         switch(offset){
             case 0:
                 digitalWrite(LED_1, 0);
@@ -59,20 +65,23 @@ void changeAddress(){
                 digitalWrite(LED_2, 1);
                 break;
         }
+        lastChangeButtonPress = buttonPress;
     }
-
 }
 
 void writeAddress(){
     int i;
-    int writeButton = digitalRead(BUTTON_1);
-    if(writeButton == 1){
-        Serial.print("writing address");
-        byte old_address = find_device();
-        Wire.beginTransmission(old_address);
+    int buttonPress = 0;
+    if(buttonPress > lastWriteButtonPress+1000){
+        byte oldAddress = find_device();
+        Serial.print("writing new address ");
+        Serial.println(newAddress);
+        Serial.print(" to old address ");
+        Serial.println(oldAddress);
+        Wire.beginTransmission(oldAddress);
         Wire.write(ADDR_UNLOCK_1);
         Wire.write(ADDR_UNLOCK_2);
-        Wire.write(new_address);
+        Wire.write(newAddress);
         Wire.endTransmission();
         for(i=0;i<5;i++){
             digitalWrite(LED_1, 1);
@@ -82,6 +91,7 @@ void writeAddress(){
             digitalWrite(LED_2, 0);
             delay(50);
         }
+        lastWriteButtonPress = buttonPress;
     }
 }
 
