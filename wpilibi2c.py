@@ -32,7 +32,7 @@ if __name__ == '__main__':
     time.sleep(.1)
 
     # read the results
-    buffer = commandI2C.readOnly(2)
+    buffer = locationI2C.readOnly(2)
     distance = buffer[1]
     distance = (distance << 8) | buffer[0]
 
