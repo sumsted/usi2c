@@ -42,9 +42,9 @@ void setup() {
 /*
  * on the real bot this is would be the i2c addr even number that receives a reading or change address command
  */
-void receiveEvent(int bytes) {
+void receiveEvent(int numBytes) {
     Serial.println("receive event");
-    processCommand(bytes);
+    processCommand(numBytes);
 }
 
 /*
@@ -69,17 +69,23 @@ void loop() {
     }
 }
 
-
-void processCommand(int bytes){
-    if(bytes > 0){
-        byte command = Wire.read();    // read one character from the I2C
-        if(command == READ_SENSOR){
+#define MAX_BYTES 10
+void processCommand(int numBytes){
+    Serial.print("command bytes ");
+    Serial.println(numBytes);
+    byte buffer[MAX_BYTES];
+    if(numBytes > 0){
+        for(int i=0;i<numBytes;i++){
+            buffer[i] = Wire.read();
+            Serial.print(buffer[i]);
+            Serial.print("\t");
+        }
+        Serial.print("\n");
+        if(buffer[0] == READ_SENSOR){
             readSensorCommand();
-        } else if(bytes == 3){
-            byte secondByte = Wire.read();
-            if(command == ADDR_UNLOCK_1 && secondByte == ADDR_UNLOCK_2){
-                byte newAddress = Wire.read();
-                changeAddressCommand(newAddress);
+        } else if(numBytes == 3){
+            if(buffer[0] == ADDR_UNLOCK_1 && buffer[1] == ADDR_UNLOCK_2){
+                changeAddressCommand(buffer[3]);
             }
         }
     }
@@ -103,4 +109,5 @@ void sendSensorData(){
 }
 
 void changeAddressCommand(byte newAddress){
+    Serial.println("change address");
 }

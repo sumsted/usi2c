@@ -13,19 +13,22 @@
 #define ADDR_UNLOCK_1 170
 #define ADDR_UNLOCK_2 165
 
-byte baseAddress = 0;
+byte currentAddress = 0;
+byte baseAddress = 96;
 byte newAddress = 0;
 byte offset = 0;
 
 long lastChangeButtonPress = 0;
 long lastWriteButtonPress = 0;
 
+byte doWriteAddress = 0;
+
 void setup() {
     Wire.begin();
     Serial.begin(57600);
     Serial.println("start");
 
-    baseAddress = findDevice();
+    currentAddress = sendFindDevice();
 
     pinMode (LED_1, OUTPUT);
     pinMode (LED_2, OUTPUT);
@@ -33,22 +36,24 @@ void setup() {
     pinMode(BUTTON_1, INPUT);
     pinMode(WRITE_BUTTON, INPUT);
 
-    attachInterrupt(INT0, changeAddress, CHANGE);
-    attachInterrupt(INT1, writeAddress,  CHANGE);
+    attachInterrupt(INT0, changeAddressCommand, CHANGE);
+    attachInterrupt(INT1, writeAddressCommand,  CHANGE);
 }
 
-
 void loop() {
-//    Serial.println(find_device());
+    if(doWriteAddress == 1){
+        sendWriteAddress();
+        doWriteAddress = 0;
+    }
     delay(100);
 }
 
-void changeAddress(){
-    Serial.print("change ");
+void changeAddressCommand(){
+//    Serial.print("change ");
     long buttonPress = millis();
-    Serial.print(buttonPress);
-    Serial.print(" - ");
-    Serial.println(lastChangeButtonPress);
+//    Serial.print(buttonPress);
+//    Serial.print(" - ");
+//    Serial.println(lastChangeButtonPress);
     if(buttonPress > lastChangeButtonPress+1000){
         Serial.print("new address will be ");
         offset++;
@@ -82,35 +87,39 @@ void changeAddress(){
     }
 }
 
-void writeAddress(){
-    Serial.print("write ");
-    long buttonPress = millis();
-    Serial.print(buttonPress);
-    Serial.print(" - ");
-    Serial.println(lastWriteButtonPress);
-    if(buttonPress > lastWriteButtonPress+1000){
-        byte oldAddress = baseAddress;
-        Serial.print("writing new address ");
-        Serial.println(newAddress);
-        Serial.print(" to old address ");
-        Serial.println(oldAddress);
-        Serial.flush();
-        Wire.beginTransmission(oldAddress);
-        Wire.write(ADDR_UNLOCK_1);
-        Wire.write(ADDR_UNLOCK_2);
-        Wire.write(newAddress);
-        Wire.endTransmission();
 
-//        baseAddress = findDevice();
+
+void writeAddressCommand(){
+//    Serial.print("write ");
+    long buttonPress = millis();
+//    Serial.print(buttonPress);
+//    Serial.print(" - ");
+//    Serial.println(lastWriteButtonPress);
+    if(buttonPress > lastWriteButtonPress+1000){
+        doWriteAddress = 1;
         lastWriteButtonPress = buttonPress;
     }
 }
 
-int findDevice(){
+void sendWriteAddress(){
+    Serial.print("writing new address ");
+    Serial.println(newAddress);
+    Serial.print(" to old address ");
+    Serial.println(baseAddress);
+    Serial.flush();
+    Wire.beginTransmission(currentAddress);
+    Wire.write(ADDR_UNLOCK_1);
+    Wire.write(ADDR_UNLOCK_2);
+    Wire.write(newAddress);
+    Wire.endTransmission();
+    currentAddress = sendFindDevice();
+    Serial.println("done writing address");
+}
+
+int sendFindDevice(){
     byte address;
     int bytesWritten;
     int bytesAvailable;
-//    Serial.println("\nlooking for active i2c addresses");
     for(address=2;address<128;address+=2){
         Wire.beginTransmission(address);
         bytesWritten = Wire.write(READ_SENSOR);
