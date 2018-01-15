@@ -49,11 +49,7 @@ void loop() {
 }
 
 void changeAddressCommand(){
-//    Serial.print("change ");
     long buttonPress = millis();
-//    Serial.print(buttonPress);
-//    Serial.print(" - ");
-//    Serial.println(lastChangeButtonPress);
     if(buttonPress > lastChangeButtonPress+1000){
         Serial.print("new address will be ");
         offset++;
@@ -87,14 +83,8 @@ void changeAddressCommand(){
     }
 }
 
-
-
 void writeAddressCommand(){
-//    Serial.print("write ");
     long buttonPress = millis();
-//    Serial.print(buttonPress);
-//    Serial.print(" - ");
-//    Serial.println(lastWriteButtonPress);
     if(buttonPress > lastWriteButtonPress+1000){
         doWriteAddress = 1;
         lastWriteButtonPress = buttonPress;
@@ -113,7 +103,8 @@ void sendWriteAddress(){
     Wire.write(newAddress);
     Wire.endTransmission();
     currentAddress = sendFindDevice();
-    Serial.println("done writing address");
+    Serial.print("done writing address, new address ");
+    Serial.println(currentAddress);
 }
 
 int sendFindDevice(){
