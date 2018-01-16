@@ -2,8 +2,12 @@ import time
 import smbus
 
 
-class WpilibI2C:
+class I2C:
     """ simulate """
+    class Port:
+        kOnboard = 0
+        kMXP = 1
+
     def __init__(self, port, address):
         self.port = port
         self.address = address
@@ -59,14 +63,18 @@ if __name__ == '__main__':
     ADDRESS = 0x60
     READ_OFFSET = 0  # 1 in real life
     RANGE_COMMAND = 81
-    commandI2C = WpilibI2C(1, ADDRESS)
-    locationI2C = WpilibI2C(1, ADDRESS + READ_OFFSET)
+    RANGE_DELAY = .08
+
+    # assuming
+    # from wpilib import I2C
+    commandI2C = I2C(I2C.Port.kOnboard, ADDRESS)
+    locationI2C = I2C(I2C.Port.kOnboard, ADDRESS + READ_OFFSET)
 
     # tell slave to ping
     commandI2C.writeBulk([RANGE_COMMAND])
 
     # wait
-    time.sleep(.1)
+    time.sleep(RANGE_DELAY)
 
     # read the results
     buffer = locationI2C.readOnly(2)

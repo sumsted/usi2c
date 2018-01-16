@@ -95,7 +95,7 @@ void sendWriteAddress(){
     Serial.print("writing new address ");
     Serial.println(newAddress);
     Serial.print(" to old address ");
-    Serial.println(baseAddress);
+    Serial.println(currentAddress);
     Serial.flush();
     Wire.beginTransmission(currentAddress);
     Wire.write(ADDR_UNLOCK_1);

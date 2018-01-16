@@ -110,4 +110,5 @@ void sendSensorData(){
 
 void changeAddressCommand(byte newAddress){
     Serial.println("change address");
+    Wire.begin(newAddress);
 }
