@@ -89,7 +89,7 @@ void writeAddressCommand(){
 
 void sendWriteAddress(){
     Serial.print("writing new address ");
-    Serial.println(newAddress);
+    Serial.print(newAddress);
     Serial.print(" to old address ");
     Serial.println(currentAddress);
     Serial.flush();
