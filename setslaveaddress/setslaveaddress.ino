@@ -55,11 +55,7 @@ void changeAddressCommand(){
         offset++;
         byte factor = offset % 4;
         newAddress = baseAddress + factor*10;
-        Serial.print(newAddress);
-        Serial.print(" - ");
-        Serial.print(offset);
-        Serial.print(" - ");
-        Serial.println(factor);
+        Serial.println(newAddress);
 
         switch(factor){
             case 0:
@@ -118,6 +114,8 @@ int sendFindDevice(){
         Wire.requestFrom(address | READ_OFFSET, 2);
         bytesAvailable = Wire.available();
         if(bytesWritten == 1 && bytesAvailable == 2){
+            Serial.print("device found at address: ");
+            Serial.println(address);
             return address;
         }
     }

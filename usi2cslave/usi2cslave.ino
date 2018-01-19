@@ -85,7 +85,7 @@ void processCommand(int numBytes){
             readSensorCommand();
         } else if(numBytes == 3){
             if(buffer[0] == ADDR_UNLOCK_1 && buffer[1] == ADDR_UNLOCK_2){
-                changeAddressCommand(buffer[3]);
+                changeAddressCommand(buffer[2]);
             }
         }
     }
@@ -109,6 +109,7 @@ void sendSensorData(){
 }
 
 void changeAddressCommand(byte newAddress){
-    Serial.println("change address");
+    Serial.print("change address to: ");
+    Serial.println(newAddress);
     Wire.begin(newAddress);
 }
